@@ -102,7 +102,7 @@ function txt(key,label,ph,area){const el=area?`<textarea data-f="${key}" placeho
 function renderForm(){
 $("#form").innerHTML=`
 <h2>① 遊戲概念</h2><p class="hint">用最簡單的話說清楚「這是什麼遊戲」。</p>
-${txt("name","遊戲名稱","例：雲端跳跳")}
+${txt("name","遊戲名稱(可更改)","例：雲端跳跳")}
 <div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💡 靈感名稱：</small>${NAMES.map(n=>`<button type="button" class="nchip${S.name===n?" on":""}" data-n="${n}">${n}</button>`).join("")}</div>
 <label class="t">遊戲類型</label>${chips("type",TYPES)}
 ${txt("pitch","一句話介紹","例：小貓在雲朵間往上跳，收集星星",1)}
