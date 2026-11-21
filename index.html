@@ -77,6 +77,7 @@ const GOALS=["刷新最高分","通關所有關卡","在時間內完成任務","
 const WINS=["達到目標分數","清除所有敵人或障礙","抵達終點","存活到時間結束","完成全部關卡"];
 const LOSES=["生命值歸零","撞到障礙或敵人","時間用完","掉出畫面","被對手搶先達標"];
 const TI={"平台跳躍":"控制角色在平台之間跳躍，閃避陷阱、收集道具並抵達終點。","太空射擊":"駕駛飛船在太空中射擊來襲的敵機與隕石，撐越久、分數越高。","打磚塊":"用擋板反彈小球，打碎上方所有磚塊且不能讓球掉落。","貪食蛇":"操控一條會越吃越長的蛇，吃到食物得分，別撞到牆或自己。","益智消除":"交換或點選相同圖案，湊成一組即可消除並連鎖得分。","塔防":"在路徑旁建造防禦塔，阻止一波波敵人抵達基地。","躲避障礙":"操控角色閃躲不斷出現的障礙物，存活越久越好。","記憶翻牌":"翻開卡片找出成對的圖案，用最少步數完成配對。","文字冒險":"閱讀劇情並做出選擇，不同決定會帶來不同結局。","節奏音游":"跟著音樂節拍在正確時機按鍵，打出連擊與高準確率。","賽車":"駕駛賽車閃避障礙與對手，在最短時間內衝過終點。","反應點擊":"目標隨機出現，在時間內快速點擊來累積分數。","乒乓對戰":"操控球拍接球反擊，先得到指定分數的一方獲勝。","無盡跑酷":"角色自動向前奔跑，靠跳躍與滑行閃避障礙，跑得越遠越好。","俯視角射擊":"從上方視角移動並射擊四面八方來襲的敵人。","橫向捲軸動作":"在左右捲動的關卡中戰鬥、跳躍並挑戰頭目。","推箱子解謎":"在有限空間內把箱子推到指定位置，需要動腦規劃步驟。","迷宮探索":"在迷宮中尋找出口，可能還要收集鑰匙或躲避敵人。","俄羅斯方塊":"移動並旋轉掉落的方塊，排滿一整行即可消除。","彈珠台":"用彈板把鋼珠彈回場中撞擊機關，累積高分且別讓球漏掉。","卡牌對戰":"收集並組合卡牌，利用策略與對手輪流出牌對決。","回合制策略":"雙方輪流行動，靠佈陣與資源管理擊敗對手。","角色扮演 RPG":"扮演主角探索世界、戰鬥升級並推進劇情。","生存建造":"收集資源、建造基地，在惡劣環境中努力活下去。","模擬經營":"管理資源與設施，讓自己的店鋪或城市逐步成長。","放置點擊":"透過點擊與自動收益累積資源，持續升級變強。","文字猜謎":"根據提示猜出單字、成語或答案，答對得分。","格鬥對戰":"操控角色用拳腳與招式對決，打倒對手取勝。","釣魚休閒":"拋竿等待魚上鉤，抓準時機釣起各種魚並收集圖鑑。","農場經營":"種植作物、飼養動物並出售收成，把農場打造得更大。","潛行躲藏":"避開守衛的視線偷偷前進，完成任務而不被發現。","物理拋射":"調整角度與力道發射物體，利用物理效果擊中目標。","拼圖":"把打散的碎片拼回完整圖案，或移動方塊還原畫面。"};
+function typeDefaults(){S.hero=OPT("h")[0];S.goal=OPT("g")[0];S.win=OPT("w")[0];S.lose=OPT("l")[0];S.controls=[CTRL[0]];S.ctrlTouched=false;S.diff=DIFF[0]}
 function defCtrl(){if(!S.ctrlTouched&&!S.controls.includes(CTRL[0]))S.controls.unshift(CTRL[0])}
 function isAuto(p){return !p||!p.trim()||Object.values(TI).includes(p)}
 function autoPitch(){if(isAuto(S.pitch))S.pitch=TI[S.type]||""}
@@ -206,7 +207,7 @@ $("#out").innerHTML=h}
 function toast(){const t=$("#toast");t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1300)}
 document.addEventListener("click",e=>{
 const c=e.target.closest(".chip");
-if(c){const k=c.dataset.k,v=c.dataset.v;if(c.dataset.m==="1"){const a=S[k];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);if(k==="controls")S.ctrlTouched=true}else S[k]=S[k]===v?"":v;if(k==="type"){autoPitch();defCtrl()}save();renderForm();renderOut();return}
+if(c){const k=c.dataset.k,v=c.dataset.v;if(c.dataset.m==="1"){const a=S[k];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);if(k==="controls")S.ctrlTouched=true}else S[k]=S[k]===v?"":v;if(k==="type"){autoPitch();if(S.type)typeDefaults();defCtrl()}save();renderForm();renderOut();return}
 if(e.target.closest("[data-h]")){S.hero=e.target.closest("[data-h]").dataset.h;save();renderForm();renderOut();return}
 if(e.target.closest("[data-ap]")){S.pitch=TI[S.type]||S.pitch;save();renderForm();renderOut();return}
 const ls=e.target.closest("[data-l]");if(ls){S.lose=ls.dataset.l;save();renderForm();renderOut();return}
