@@ -76,6 +76,13 @@ const NAMES=["星海迷航","像素冒險家","糖果大冒險","暗影迴廊","
 const GOALS=["刷新最高分","通關所有關卡","在時間內完成任務","擊敗最終頭目","收集全部道具"];
 const WINS=["達到目標分數","清除所有敵人或障礙","抵達終點","存活到時間結束","完成全部關卡"];
 const LOSES=["生命值歸零","撞到障礙或敵人","時間用完","掉出畫面","被對手搶先達標"];
+const TI={"平台跳躍":"控制角色在平台之間跳躍，閃避陷阱、收集道具並抵達終點。","太空射擊":"駕駛飛船在太空中射擊來襲的敵機與隕石，撐越久、分數越高。","打磚塊":"用擋板反彈小球，打碎上方所有磚塊且不能讓球掉落。","貪食蛇":"操控一條會越吃越長的蛇，吃到食物得分，別撞到牆或自己。","益智消除":"交換或點選相同圖案，湊成一組即可消除並連鎖得分。","塔防":"在路徑旁建造防禦塔，阻止一波波敵人抵達基地。","躲避障礙":"操控角色閃躲不斷出現的障礙物，存活越久越好。","記憶翻牌":"翻開卡片找出成對的圖案，用最少步數完成配對。","文字冒險":"閱讀劇情並做出選擇，不同決定會帶來不同結局。","節奏音游":"跟著音樂節拍在正確時機按鍵，打出連擊與高準確率。","賽車":"駕駛賽車閃避障礙與對手，在最短時間內衝過終點。","反應點擊":"目標隨機出現，在時間內快速點擊來累積分數。","乒乓對戰":"操控球拍接球反擊，先得到指定分數的一方獲勝。","無盡跑酷":"角色自動向前奔跑，靠跳躍與滑行閃避障礙，跑得越遠越好。","俯視角射擊":"從上方視角移動並射擊四面八方來襲的敵人。","橫向捲軸動作":"在左右捲動的關卡中戰鬥、跳躍並挑戰頭目。","推箱子解謎":"在有限空間內把箱子推到指定位置，需要動腦規劃步驟。","迷宮探索":"在迷宮中尋找出口，可能還要收集鑰匙或躲避敵人。","俄羅斯方塊":"移動並旋轉掉落的方塊，排滿一整行即可消除。","彈珠台":"用彈板把鋼珠彈回場中撞擊機關，累積高分且別讓球漏掉。","卡牌對戰":"收集並組合卡牌，利用策略與對手輪流出牌對決。","回合制策略":"雙方輪流行動，靠佈陣與資源管理擊敗對手。","角色扮演 RPG":"扮演主角探索世界、戰鬥升級並推進劇情。","生存建造":"收集資源、建造基地，在惡劣環境中努力活下去。","模擬經營":"管理資源與設施，讓自己的店鋪或城市逐步成長。","放置點擊":"透過點擊與自動收益累積資源，持續升級變強。","文字猜謎":"根據提示猜出單字、成語或答案，答對得分。","格鬥對戰":"操控角色用拳腳與招式對決，打倒對手取勝。","釣魚休閒":"拋竿等待魚上鉤，抓準時機釣起各種魚並收集圖鑑。","農場經營":"種植作物、飼養動物並出售收成，把農場打造得更大。","潛行躲藏":"避開守衛的視線偷偷前進，完成任務而不被發現。","物理拋射":"調整角度與力道發射物體，利用物理效果擊中目標。","拼圖":"把打散的碎片拼回完整圖案，或移動方塊還原畫面。"};
+function defCtrl(){if(!S.ctrlTouched&&!S.controls.includes(CTRL[0]))S.controls.unshift(CTRL[0])}
+function isAuto(p){return !p||!p.trim()||Object.values(TI).includes(p)}
+function autoPitch(){if(isAuto(S.pitch))S.pitch=TI[S.type]||""}
+const TY={"平台跳躍":"戴帽子的小貓,紅色小機器人,勇敢的小騎士|跳到最高處,收集所有星星,抵達終點旗|抵達終點旗,收集全部星星,通過全部關卡|掉進深坑,生命歸零,碰到陷阱","太空射擊":"藍色小戰機,太空巡邏員,機械海盜船|擊落最多敵機,撐過所有波次,擊敗最終頭目|擊敗最終頭目,撐過全部波次,達到目標分數|戰機被擊毀,生命歸零,讓敵人突破防線","打磚塊":"可左右移動的擋板,發光彈力球,迷你太空船擋板|打碎全部磚塊,取得最高分,接住道具延長擋板|清除全部磚塊,通過全部關卡,達到目標分數|球掉出畫面底部,生命歸零,時間用完","貪食蛇":"發光小蛇,貪吃毛毛蟲,像素巨蟒|吃到最多食物,讓蛇長到最長,刷新最高分|蛇長度達到目標,填滿整個地圖,存活到時間結束|撞到牆壁,咬到自己,撞到障礙物","益智消除":"彩色寶石,可愛水果,動物方塊|在步數內達到目標分數,消除指定圖案,製造連鎖消除|達到目標分數,收集指定數量,通過全部關卡|步數用完,時間用完,棋盤無法再消除","塔防":"可升級的炮塔,魔法守衛,機械防禦塔|守住基地,撐過所有波次,擊殺最多敵人|擊退全部波次,基地存活到最後,擊敗頭目波|基地生命歸零,敵人抵達終點,資源耗盡","躲避障礙":"靈活小方塊,飛行小鳥,滑板少年|存活最久,穿過最多障礙,拿到最高分|存活到時間結束,穿越全部障礙,刷新最高分|撞到障礙物,掉出畫面,生命歸零","記憶翻牌":"動物卡片,水果卡片,星座卡片|用最少步數配對,在時間內完成,連續配對不失誤|配對完全部卡片,在時限內完成,達到目標星級|時間用完,失誤次數過多,步數用完","文字冒險":"迷路的旅人,年輕偵探,見習魔法師|解開故事謎團,找到出口,收集關鍵線索|達成好結局,取得關鍵物品逃脫,解開全部謎題|做出致命選擇,線索不足而迷失,時間耗盡","節奏音游":"四條音軌,光之音符,節拍小精靈|打出滿分連擊,高準確率完成曲目,解鎖全部歌曲|完成整首曲目,達到 B 評級以上,全連擊|血量條歸零,Miss 過多,評級過低","賽車":"紅色小賽車,復古跑車,越野摩托車|最快跑完全程,拿下第一名,刷新單圈紀錄|完成三圈,名次進前三,時間內衝線|時間用完,車輛撞毀,排名墊底","反應點擊":"小木槌,瞄準準星,手指游標|限時內拿最高分,連續命中不失誤,反應越快越好|時限結束達到目標分數,連續命中 10 次,刷新最高分|點到炸彈,錯過太多目標,時間用完","乒乓對戰":"左側球拍,霓虹球拍,迷你機器人球拍|先拿到 7 分,接住每一球,擊敗電腦|先拿到 7 分,贏下整場比賽,連勝三場|對手先拿到 7 分,漏接次數過多,時間用完","無盡跑酷":"奔跑的小忍者,滑板少年,逃跑的小狗|跑得最遠,收集最多金幣,刷新最高分|跑滿目標距離,收集足夠金幣,完成每日任務|撞到障礙物,掉進坑洞,被追趕者抓到","俯視角射擊":"戰術小隊長,魔法射手,生存者|清除所有敵人,存活到最後,獲取最高分|清除全部波次,擊敗頭目,存活到時間結束|生命值歸零,被敵人包圍,彈藥耗盡","橫向捲軸動作":"持劍勇者,忍者,機甲戰士|通過全部關卡,擊敗頭目,收集強化道具|擊敗最終頭目,通關最後一關,收集全部道具|生命值歸零,掉入深淵,時間用完","推箱子解謎":"搬運工人,小機器人,可愛小熊|用最少步數完成,把所有箱子推到位,通過全部關卡|所有箱子歸位,通過全部關卡,步數達標|箱子卡死無法移動,步數用完,時間用完","迷宮探索":"迷路的探險家,小老鼠,持火把的勇士|找到出口,收集所有寶物,在時間內逃出|抵達出口,集齊鑰匙後開門,通過全部迷宮|被怪物抓到,時間用完,火把熄滅","俄羅斯方塊":"掉落方塊,七種方塊,彩色積木|消除最多行數,堆疊越高分越高,刷新最高分|消除目標行數,達到目標分數,存活到時間結束|方塊堆到頂端,無法放置新方塊,時間用完","彈珠台":"銀色鋼珠,彈板,發光彈力球|累積最高分,觸發全部機關,打進高分洞|達到目標分數,觸發全部機關,完成任務模式|鋼珠全部漏掉,彈珠數用完,時間用完","卡牌對戰":"見習召喚師,卡牌戰士,魔法師|擊敗對手,組出最強牌組,取得連勝|將對手生命降到 0,贏下整場對戰,打敗頭目|自己生命降到 0,牌庫抽完,回合數用完","回合制策略":"指揮官,小隊成員,王國領袖|佔領所有據點,擊潰敵軍,管理好資源|消滅全部敵軍,佔領敵方基地,在回合內達成目標|主力單位全滅,基地被佔領,回合數用完","角色扮演 RPG":"初心勇者,見習魔法師,流浪騎士|擊敗魔王,完成主線任務,升到最高等級|擊敗最終頭目,完成主線劇情,解鎖結局|隊伍全員倒下,主線任務失敗,關鍵角色死亡","生存建造":"荒島倖存者,拓荒者,末日生還者|活過最多天數,打造安全基地,收集稀有資源|撐過指定天數,建成完整基地,成功逃離|生命值歸零,飢餓或口渴致死,基地被摧毀","模擬經營":"咖啡店老闆,小鎮市長,餐廳經理|賺最多錢,擴大規模,讓顧客滿意|達到目標資產,解鎖全部設施,獲得五星評價|資金破產,顧客滿意度過低,期限內未達標","放置點擊":"點擊小精靈,自動礦工,神秘寶箱|累積最多資源,購買全部升級,解鎖新階段|達到目標資源數,解鎖全部升級,到達最終階段|無失敗條件（純休閒）,資源耗盡需重來,限時活動未達標","文字猜謎":"猜謎小達人,偵探,冒險學者|答對最多題,連續答對,在時間內完成|答對全部題目,達到目標分數,連續答對 10 題|答錯次數過多,時間用完,提示用完","格鬥對戰":"拳擊手,武術家,機甲戰士|擊倒對手,連勝晉級,學會全部招式|血量歸零前擊倒對手,贏下兩回合,擊敗最終對手|自己血量歸零,時間到血量較少,連敗過多","釣魚休閒":"悠閒釣客,海邊老爺爺,小漁夫|釣到最稀有的魚,完成魚類圖鑑,賺最多錢|完成魚類圖鑑,達到目標漁獲量,釣到傳說魚|無失敗條件（純休閒）,魚線斷掉需重釣,時間用完","農場經營":"年輕農夫,牧場主人,小鎮新居民|讓農場興旺,收穫最多作物,擴建農場|達到目標資產,完成所有訂單,解鎖全部作物|作物枯死血本無歸,資金耗盡,期限內未達標","潛行躲藏":"神秘小偷,特務,小幽靈|不被發現完成任務,偷到目標物品,安全離開|取得目標並逃出,通過全部關卡,零警報完成|被守衛發現,警報次數過多,時間用完","物理拋射":"發射的小鳥,砲彈,彈弓小子|擊倒所有目標,用最少次數過關,三星完成|擊中全部目標,通過全部關卡,三星通關|發射次數用完,目標未被擊倒,時間用完","拼圖":"圖片碎片,數字方塊,彩色拼塊|拼出完整圖案,最短時間完成,最少步數完成|拼完整張圖,在限時內完成,通過全部關卡|時間用完,步數用完,放錯次數過多"};
+const HGEN=["勇敢的小戰士","可愛的小動物","小機器人"];
+function OPT(c){const r=TY[S.type];if(r)return r.split("|")["hgwl".indexOf(c)].split(",");return {h:HGEN,g:GOALS,w:WINS,l:LOSES}[c]}
 const DIFF=["輕鬆","適中","具挑戰性"];
 const P={
 snake:{name:"霓虹貪食蛇",type:"貪食蛇",tech:TECH[0],pitch:"控制發光小蛇吃能量球，越吃越長，撞牆或撞到自己就結束。",hero:"一條發光的小蛇",goal:"吃到越多能量球越好，刷新最高分",controls:[CTRL[0],CTRL[3]],win:"持續存活並刷新最高分",lose:"撞到牆壁或自己身體",diff:"適中",style:"霓虹科幻",feats:["計分","最高分紀錄","暫停功能","開始／結束畫面","行動裝置支援"],extra:"吃到 5 顆球後速度加快"},
@@ -92,7 +99,7 @@ race:{name:"極速賽道",type:"賽車",tech:TECH[0],pitch:"俯視角賽車，�
 whack:{name:"打地鼠大作戰",type:"反應點擊",tech:TECH[0],pitch:"地鼠隨機冒出，點擊打中得分，炸彈不能打。",hero:"一支可愛的小木槌",goal:"在 60 秒內拿到最高分",controls:[CTRL[2],CTRL[3]],win:"時間結束時達到目標分數",lose:"打到炸彈三次或分數未達標",diff:"輕鬆",style:"可愛手繪",feats:["計分","生命值","最高分紀錄","音效與音樂","行動裝置支援"],extra:"時間越久地鼠冒出越快，偶爾出現金色地鼠加倍分"},
 pong:{name:"霓虹乒乓",type:"乒乓對戰",tech:TECH[0],pitch:"經典雙人／單機乒乓，球速逐漸加快，先拿 7 分者勝。",hero:"兩支球拍與一顆發光球",goal:"率先得到 7 分",controls:[CTRL[0],CTRL[3]],win:"先拿到 7 分",lose:"對手先拿到 7 分",diff:"適中",style:"霓虹科幻",feats:["計分","難度選擇","音效與音樂","暫停功能","開始／結束畫面"],extra:"提供單人對電腦（三種 AI 強度）與雙人同機模式"}
 };
-let S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};
+let S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[CTRL[0]],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};
 try{const sv=localStorage.getItem("gps");if(sv)S=Object.assign(S,JSON.parse(sv))}catch(e){}
 let tab="full";
 const $=s=>document.querySelector(s);
@@ -105,18 +112,20 @@ $("#form").innerHTML=`
 ${txt("name","遊戲名稱(可更改)","例：雲端跳跳")}
 <div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💡 靈感名稱：</small>${NAMES.map(n=>`<button type="button" class="nchip${S.name===n?" on":""}" data-n="${n}">${n}</button>`).join("")}</div>
 <label class="t">遊戲類型</label>${chips("type",TYPES)}
-${txt("pitch","一句話介紹","例：小貓在雲朵間往上跳，收集星星",1)}
+${txt("pitch","一句話介紹（選類型會自動帶入）","例：小貓在雲朵間往上跳，收集星星",1)}
+${S.type&&TI[S.type]&&!isAuto(S.pitch)&&S.pitch!==TI[S.type]?`<div class="hint" style="margin:6px 0 0">💡「${S.type}」簡介：${TI[S.type]} <button type="button" class="nchip" data-ap="1">套用</button></div>`:""}
 <h2 style="margin-top:20px">② 技術平台</h2><p class="hint">完全新手建議選第一個：一個檔案、雙擊就能玩。</p>
 <select data-f="tech">${TECH.map(t=>`<option${S.tech===t?" selected":""}>${t}</option>`).join("")}</select>
 <h2 style="margin-top:20px">③ 玩法與規則</h2>
-${txt("hero","主角是誰？","例：一隻戴帽子的小貓")}
-${txt("goal","玩家的目標","例：跳得越高越好")}
-<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🎯 常見目標：</small>${GOALS.map(g=>`<button type="button" class="nchip${S.goal===g?" on":""}" data-g="${g}">${g}</button>`).join("")}</div>
+${txt("hero","主角是誰？","例："+OPT("h")[0])}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🦸 角色建議：</small>${OPT("h").map(x=>`<button type="button" class="nchip${S.hero===x?" on":""}" data-h="${x}">${x}</button>`).join("")}</div>
+${txt("goal","玩家的目標","例："+OPT("g")[0])}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🎯 常見目標：</small>${OPT("g").map(g=>`<button type="button" class="nchip${S.goal===g?" on":""}" data-g="${g}">${g}</button>`).join("")}</div>
 <label class="t">操作方式（可複選）</label>${chips("controls",CTRL,1)}
-${txt("win","勝利條件","例：抵達終點旗")}
-<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🏆 常見勝利：</small>${WINS.map(w=>`<button type="button" class="nchip${S.win===w?" on":""}" data-w="${w}">${w}</button>`).join("")}</div>
-${txt("lose","失敗條件","例：掉下去或生命歸零")}
-<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💀 常見失敗：</small>${LOSES.map(l=>`<button type="button" class="nchip${S.lose===l?" on":""}" data-l="${l}">${l}</button>`).join("")}</div>
+${txt("win","勝利條件","例："+OPT("w")[0])}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🏆 常見勝利：</small>${OPT("w").map(w=>`<button type="button" class="nchip${S.win===w?" on":""}" data-w="${w}">${w}</button>`).join("")}</div>
+${txt("lose","失敗條件","例："+OPT("l")[0])}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💀 常見失敗：</small>${OPT("l").map(l=>`<button type="button" class="nchip${S.lose===l?" on":""}" data-l="${l}">${l}</button>`).join("")}</div>
 <label class="t">難度感受</label>${chips("diff",DIFF)}
 <h2 style="margin-top:20px">④ 風格與功能</h2>
 <label class="t">美術風格</label>${chips("style",STYLE)}
@@ -197,20 +206,22 @@ $("#out").innerHTML=h}
 function toast(){const t=$("#toast");t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1300)}
 document.addEventListener("click",e=>{
 const c=e.target.closest(".chip");
-if(c){const k=c.dataset.k,v=c.dataset.v;if(c.dataset.m==="1"){const a=S[k];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v)}else S[k]=S[k]===v?"":v;save();renderForm();renderOut();return}
+if(c){const k=c.dataset.k,v=c.dataset.v;if(c.dataset.m==="1"){const a=S[k];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v);if(k==="controls")S.ctrlTouched=true}else S[k]=S[k]===v?"":v;if(k==="type"){autoPitch();defCtrl()}save();renderForm();renderOut();return}
+if(e.target.closest("[data-h]")){S.hero=e.target.closest("[data-h]").dataset.h;save();renderForm();renderOut();return}
+if(e.target.closest("[data-ap]")){S.pitch=TI[S.type]||S.pitch;save();renderForm();renderOut();return}
 const ls=e.target.closest("[data-l]");if(ls){S.lose=ls.dataset.l;save();renderForm();renderOut();return}
 const wn=e.target.closest("[data-w]");if(wn){S.win=wn.dataset.w;save();renderForm();renderOut();return}
 const gl=e.target.closest("[data-g]");if(gl){S.goal=gl.dataset.g;save();renderForm();renderOut();return}
 const nm=e.target.closest("[data-n]");if(nm){S.name=nm.dataset.n;save();renderForm();renderOut();return}
 const t=e.target.closest(".tab");if(t){tab=t.dataset.t;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));renderOut();return}
 const cp=e.target.closest("[data-copy]");if(cp){const txt=document.getElementById(cp.dataset.copy).textContent;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{const r=document.createRange();r.selectNode(document.getElementById(cp.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);try{document.execCommand("copy")}catch(_){}}).finally(toast);return}
-const pr=e.target.closest("[data-p]");if(pr){const q=P[pr.dataset.p];S=Object.assign({},S,q,{feats:q.feats.slice(),controls:q.controls.slice(),td:(q.td||[]).slice()});save();renderForm();renderOut();return}
-if(e.target.id==="reset"){S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};save();renderForm();renderOut()}
+const pr=e.target.closest("[data-p]");if(pr){const q=P[pr.dataset.p];S=Object.assign({},S,q,{feats:q.feats.slice(),controls:q.controls.slice(),td:(q.td||[]).slice(),ctrlTouched:false});defCtrl();save();renderForm();renderOut();return}
+if(e.target.id==="reset"){S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[CTRL[0]],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};save();renderForm();renderOut()}
 });
 document.addEventListener("input",e=>{const f=e.target.dataset.f;if(f){S[f]=e.target.value;save();renderOut()}});
 document.addEventListener("change",e=>{const f=e.target.dataset.f;if(f&&e.target.tagName==="SELECT"){S[f]=e.target.value;save();renderOut()}});
 $("#presets").innerHTML=[["snake","🐍 貪食蛇"],["jump","🐱 平台跳躍"],["shoot","🚀 太空射擊"],["brick","🧱 打磚塊"],["match3","💎 寶石消除"],["memory","🃏 記憶翻牌"],["flap","🐦 小鳥穿越"],["td","🏰 迷你塔防"],["text","📖 文字冒險"],["rhythm","🎵 節奏音游"],["race","🏎️ 賽車"],["whack","🔨 打地鼠"],["pong","🏓 乒乓對戰"]].map(a=>`<button class="btn sec2" data-p="${a[0]}">${a[1]}</button>`).join("");
-renderForm();renderOut();
+defCtrl();renderForm();renderOut();
 </script>
 </body>
 </html>
