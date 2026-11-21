@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>遊戲指令工坊｜新手遊戲設計 Prompt 產生器</title>
+<style>
+:root{--bg:#f6f5fb;--card:#fff;--tx:#1f1d2e;--mu:#6b6882;--bd:#e3e0f0;--ac:#6c4cf1;--ac2:#ede9ff;--ok:#12a46b;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#14131c;--card:#1d1b29;--tx:#eceaf8;--mu:#9a97b3;--bd:#322f46;--ac:#9a82ff;--ac2:#2a2545;--ok:#3fd69a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#14131c;--card:#1d1b29;--tx:#eceaf8;--mu:#9a97b3;--bd:#322f46;--ac:#9a82ff;--ac2:#2a2545;--ok:#3fd69a;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.6 system-ui,-apple-system,"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+header{padding:22px 18px 8px;max-width:1150px;margin:auto}
+h1{margin:0;font-size:24px}header p{margin:4px 0 0;color:var(--mu)}
+.wrap{max-width:1150px;margin:auto;padding:12px 18px 40px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media(max-width:860px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px}
+.card h2{font-size:16px;margin:0 0 4px}.hint{color:var(--mu);font-size:13px;margin:0 0 10px}
+.sec{margin-bottom:14px}
+label.t{display:block;font-weight:600;margin:10px 0 4px;font-size:14px}
+input[type=text],textarea,select{width:100%;padding:9px 11px;border:1px solid var(--bd);border-radius:9px;background:var(--bg);color:var(--tx);font:inherit}
+textarea{min-height:60px;resize:vertical}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--ac);outline-offset:-1px}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip,.nchip{border:1px solid var(--bd);background:var(--bg);color:var(--tx);border-radius:99px;padding:5px 12px;cursor:pointer;font:inherit;font-size:13.5px}
+.chip.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.btn{border:0;background:var(--ac);color:#fff;border-radius:9px;padding:8px 14px;font:inherit;cursor:pointer;font-weight:600}
+.btn.sec2{background:var(--ac2);color:var(--ac)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tabs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.tab{border:1px solid var(--bd);background:var(--bg);color:var(--tx);padding:6px 12px;border-radius:9px;cursor:pointer;font:inherit;font-size:13.5px}
+.tab.on{background:var(--ac2);color:var(--ac);border-color:var(--ac);font-weight:700}
+pre{white-space:pre-wrap;word-break:break-word;background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:12px;font:13px/1.65 ui-monospace,Menlo,Consolas,"Noto Sans TC",monospace;margin:8px 0;max-height:520px;overflow:auto}
+.bar{height:8px;background:var(--bd);border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--ok);width:0;transition:width .3s}
+.stage{border:1px solid var(--bd);border-radius:11px;padding:10px 12px;margin-bottom:10px}
+.stage h3{margin:0;font-size:14.5px}.stage small{color:var(--mu)}
+.side{position:sticky;top:10px;align-self:start}
+@media(max-width:860px){.side{position:static}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 16px;border-radius:99px;opacity:0;transition:.25s;pointer-events:none}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+<h1>🎮 遊戲指令工坊</h1>
+<p>不會寫程式也能做遊戲：填表 → 自動產生給 AI 的完整指令 → 貼上就能開發。</p>
+</header>
+<div class="wrap">
+<div>
+<div class="card sec">
+<h2>⚡ 快速範例</h2><p class="hint">一鍵載入範例，再慢慢修改成你的點子。</p>
+<div class="row" id="presets"></div>
+</div>
+<div class="card" id="form"></div>
+</div>
+<div class="side card">
+<div class="row" style="justify-content:space-between"><h2>📋 產生結果</h2><span id="pct" class="hint" style="margin:0"></span></div>
+<div class="bar"><i id="barfill"></i></div>
+<div class="tabs" style="margin-top:12px">
+<button class="tab on" data-t="full">完整指令</button>
+<button class="tab" data-t="stages">分階段指令</button>
+<button class="tab" data-t="fix">除錯與優化</button>
+</div>
+<div id="out"></div>
+</div>
+</div>
+<div class="toast" id="toast">已複製 ✓</div>
+<script>
+const TYPES=["平台跳躍","太空射擊","打磚塊","貪食蛇","益智消除","塔防","躲避障礙","記憶翻牌","文字冒險","節奏音游","賽車","反應點擊","乒乓對戰","無盡跑酷","俯視角射擊","橫向捲軸動作","推箱子解謎","迷宮探索","俄羅斯方塊","彈珠台","卡牌對戰","回合制策略","角色扮演 RPG","生存建造","模擬經營","放置點擊","文字猜謎","格鬥對戰","釣魚休閒","農場經營","潛行躲藏","物理拋射","拼圖","自訂"];
+const TECH=["HTML5 Canvas 單檔網頁","Phaser 3","Python pygame","Godot (GDScript)","Unity (C#)"];
+const CTRL=["鍵盤方向鍵／WASD","空白鍵","滑鼠點擊","觸控螢幕"];
+const FEAT=["計分","生命值","多個關卡","最高分紀錄","暫停功能","音效與音樂","開始／結束畫面","行動裝置支援","難度選擇","成就系統"];
+const STYLE=["像素復古","極簡幾何","可愛手繪","霓虹科幻","黑暗奇幻","清爽扁平"];
+const TD=["單體箭塔","範圍炮塔","減速冰塔","連鎖閃電塔","遠程狙擊塔","毒霧持續傷害塔","輔助增益塔","召喚士兵塔","快速型敵人","重甲坦克敵人","飛行單位","自我治療敵人","分裂型敵人","頭目關卡","塔可升級與出售","多條進攻路徑","可自建路徑（迷宮式）","金幣與利息經濟","主動技能（空襲／冰凍）","天氣與地形效果"];
+const NAMES=["星海迷航","像素冒險家","糖果大冒險","暗影迴廊","雲端跳跳樂","霓虹狂飆","魔法森林","機械城危機","深海探險隊","勇者之路","極限挑戰","時光旅人","能量大作戰","夢幻島","火焰戰士","神秘寶藏","星際守護者","迷霧小鎮","小小冒險王","無限迴圈"];
+const GOALS=["刷新最高分","通關所有關卡","在時間內完成任務","擊敗最終頭目","收集全部道具"];
+const WINS=["達到目標分數","清除所有敵人或障礙","抵達終點","存活到時間結束","完成全部關卡"];
+const LOSES=["生命值歸零","撞到障礙或敵人","時間用完","掉出畫面","被對手搶先達標"];
+const DIFF=["輕鬆","適中","具挑戰性"];
+const P={
+snake:{name:"霓虹貪食蛇",type:"貪食蛇",tech:TECH[0],pitch:"控制發光小蛇吃能量球，越吃越長，撞牆或撞到自己就結束。",hero:"一條發光的小蛇",goal:"吃到越多能量球越好，刷新最高分",controls:[CTRL[0],CTRL[3]],win:"持續存活並刷新最高分",lose:"撞到牆壁或自己身體",diff:"適中",style:"霓虹科幻",feats:["計分","最高分紀錄","暫停功能","開始／結束畫面","行動裝置支援"],extra:"吃到 5 顆球後速度加快"},
+jump:{name:"雲端跳跳",type:"平台跳躍",tech:TECH[0],pitch:"小貓在雲朵平台間向上跳，收集星星，掉下去就輸。",hero:"一隻戴帽子的小貓",goal:"跳得越高越好並收集星星",controls:[CTRL[0],CTRL[1]],win:"抵達 3 個關卡終點旗",lose:"掉出畫面底部或生命歸零",diff:"輕鬆",style:"可愛手繪",feats:["計分","生命值","多個關卡","音效與音樂","開始／結束畫面"],extra:"每關加入會移動的平台"},
+shoot:{name:"星際守衛",type:"太空射擊",tech:TECH[0],pitch:"駕駛小飛船擊落外星隕石，撐過三波敵人與一隻頭目。",hero:"一艘藍色小戰機",goal:"擊敗頭目並拿到高分",controls:[CTRL[0],CTRL[1]],win:"擊敗第三波後的頭目",lose:"生命值歸零",diff:"具挑戰性",style:"像素復古",feats:["計分","生命值","多個關卡","音效與音樂","暫停功能","最高分紀錄"],extra:"擊落敵人有機率掉落加強道具"},
+brick:{name:"彩虹打磚塊",type:"打磚塊",tech:TECH[0],pitch:"用擋板反彈小球打碎彩色磚塊，清光全部磚塊就過關。",hero:"一個可左右移動的擋板與一顆球",goal:"打碎所有磚塊並盡量不漏球",controls:[CTRL[0],CTRL[2],CTRL[3]],win:"清除畫面上全部磚塊",lose:"球掉出畫面底部且生命用完",diff:"適中",style:"清爽扁平",feats:["計分","生命值","多個關卡","音效與音樂","開始／結束畫面"],extra:"部分磚塊掉落道具：加長擋板、多球、減速"},
+match3:{name:"寶石消消樂",type:"益智消除",tech:TECH[0],pitch:"交換相鄰寶石，連成三個以上即可消除並連鎖得分。",hero:"棋盤上的各色寶石",goal:"在步數內達到目標分數",controls:[CTRL[2],CTRL[3]],win:"步數用完前達到目標分數",lose:"步數用完仍未達標",diff:"輕鬆",style:"可愛手繪",feats:["計分","多個關卡","最高分紀錄","音效與音樂","行動裝置支援"],extra:"連鎖消除有加倍分數與特效；無解時自動洗牌"},
+memory:{name:"動物記憶配對",type:"記憶翻牌",tech:TECH[0],pitch:"翻開卡片找出成對的動物，用最少步數全部配對。",hero:"一副動物圖案卡片",goal:"以最少步數與時間完成配對",controls:[CTRL[2],CTRL[3]],win:"配對完所有卡片",lose:"超過時間限制（可選模式）",diff:"輕鬆",style:"可愛手繪",feats:["計分","難度選擇","最高分紀錄","開始／結束畫面","行動裝置支援"],extra:"難度選擇決定卡片數量（12／20／30 張）"},
+flap:{name:"小鳥穿越",type:"躲避障礙",tech:TECH[0],pitch:"點擊讓小鳥拍翅膀，穿過一根根水管間的縫隙。",hero:"一隻圓滾滾的小鳥",goal:"飛越盡可能多的水管",controls:[CTRL[1],CTRL[2],CTRL[3]],win:"無限模式：刷新最高分",lose:"撞到水管或地面",diff:"具挑戰性",style:"像素復古",feats:["計分","最高分紀錄","音效與音樂","開始／結束畫面","行動裝置支援"],extra:"分數達標時背景由白天變黃昏再變夜晚"},
+td:{name:"迷你塔防",type:"塔防",tech:TECH[0],pitch:"在路徑旁建造炮塔，阻止敵人抵達終點基地。",hero:"各式可升級的炮塔",goal:"撐過所有波次保護基地",controls:[CTRL[2],CTRL[3]],win:"擊退全部 10 波敵人",lose:"基地生命值歸零",diff:"適中",style:"極簡幾何",feats:["計分","生命值","多個關卡","暫停功能","難度選擇"],td:["單體箭塔","範圍炮塔","減速冰塔","快速型敵人","重甲坦克敵人","頭目關卡","塔可升級與出售"],extra:"擊殺得金幣；三種塔：單體、範圍、減速"},
+text:{name:"迷霧古堡",type:"文字冒險",tech:TECH[0],pitch:"以選項推進劇情，探索古堡、收集物品並做出關鍵抉擇。",hero:"一位迷路的旅人",goal:"揭開古堡秘密並找到出口",controls:[CTRL[2],CTRL[3]],win:"取得鑰匙並逃出古堡（多結局）",lose:"做出致命選擇而失敗",diff:"輕鬆",style:"黑暗奇幻",feats:["多個關卡","開始／結束畫面","成就系統","行動裝置支援"],extra:"至少三個結局，物品欄會影響可選項目"},
+rhythm:{name:"節拍四軌",type:"節奏音游",tech:TECH[0],pitch:"音符從上方落下，在判定線按對應按鍵，打出完美節奏。",hero:"四條音軌與判定線",goal:"以高準確率與連擊完成曲目",controls:[CTRL[0],CTRL[3]],win:"完成整首曲目並達到 B 評級以上",lose:"血量條歸零",diff:"具挑戰性",style:"霓虹科幻",feats:["計分","最高分紀錄","音效與音樂","難度選擇","開始／結束畫面"],extra:"判定分 Perfect／Good／Miss，結算顯示評級"},
+race:{name:"極速賽道",type:"賽車",tech:TECH[0],pitch:"俯視角賽車，閃避障礙與對手，在時間內衝過終點。",hero:"一台紅色小賽車",goal:"最快跑完三圈",controls:[CTRL[0],CTRL[3]],win:"完成三圈且名次進前三",lose:"時間用完或撞毀",diff:"適中",style:"清爽扁平",feats:["計分","多個關卡","最高分紀錄","音效與音樂","暫停功能"],extra:"賽道上有加速帶與油漬減速區"},
+whack:{name:"打地鼠大作戰",type:"反應點擊",tech:TECH[0],pitch:"地鼠隨機冒出，點擊打中得分，炸彈不能打。",hero:"一支可愛的小木槌",goal:"在 60 秒內拿到最高分",controls:[CTRL[2],CTRL[3]],win:"時間結束時達到目標分數",lose:"打到炸彈三次或分數未達標",diff:"輕鬆",style:"可愛手繪",feats:["計分","生命值","最高分紀錄","音效與音樂","行動裝置支援"],extra:"時間越久地鼠冒出越快，偶爾出現金色地鼠加倍分"},
+pong:{name:"霓虹乒乓",type:"乒乓對戰",tech:TECH[0],pitch:"經典雙人／單機乒乓，球速逐漸加快，先拿 7 分者勝。",hero:"兩支球拍與一顆發光球",goal:"率先得到 7 分",controls:[CTRL[0],CTRL[3]],win:"先拿到 7 分",lose:"對手先拿到 7 分",diff:"適中",style:"霓虹科幻",feats:["計分","難度選擇","音效與音樂","暫停功能","開始／結束畫面"],extra:"提供單人對電腦（三種 AI 強度）與雙人同機模式"}
+};
+let S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};
+try{const sv=localStorage.getItem("gps");if(sv)S=Object.assign(S,JSON.parse(sv))}catch(e){}
+let tab="full";
+const $=s=>document.querySelector(s);
+const save=()=>{try{localStorage.setItem("gps",JSON.stringify(S))}catch(e){}};
+function chips(key,list,multi){return `<div class="chips">`+list.map(v=>{const on=multi?S[key].includes(v):S[key]===v;return `<button type="button" class="chip${on?" on":""}" data-k="${key}" data-v="${v}" data-m="${multi?1:0}">${v}</button>`}).join("")+`</div>`}
+function txt(key,label,ph,area){const el=area?`<textarea data-f="${key}" placeholder="${ph}">${S[key]||""}</textarea>`:`<input type="text" data-f="${key}" placeholder="${ph}" value="${S[key]||""}">`;return `<label class="t">${label}</label>${el}`}
+function renderForm(){
+$("#form").innerHTML=`
+<h2>① 遊戲概念</h2><p class="hint">用最簡單的話說清楚「這是什麼遊戲」。</p>
+${txt("name","遊戲名稱","例：雲端跳跳")}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💡 靈感名稱：</small>${NAMES.map(n=>`<button type="button" class="nchip${S.name===n?" on":""}" data-n="${n}">${n}</button>`).join("")}</div>
+<label class="t">遊戲類型</label>${chips("type",TYPES)}
+${txt("pitch","一句話介紹","例：小貓在雲朵間往上跳，收集星星",1)}
+<h2 style="margin-top:20px">② 技術平台</h2><p class="hint">完全新手建議選第一個：一個檔案、雙擊就能玩。</p>
+<select data-f="tech">${TECH.map(t=>`<option${S.tech===t?" selected":""}>${t}</option>`).join("")}</select>
+<h2 style="margin-top:20px">③ 玩法與規則</h2>
+${txt("hero","主角是誰？","例：一隻戴帽子的小貓")}
+${txt("goal","玩家的目標","例：跳得越高越好")}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🎯 常見目標：</small>${GOALS.map(g=>`<button type="button" class="nchip${S.goal===g?" on":""}" data-g="${g}">${g}</button>`).join("")}</div>
+<label class="t">操作方式（可複選）</label>${chips("controls",CTRL,1)}
+${txt("win","勝利條件","例：抵達終點旗")}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">🏆 常見勝利：</small>${WINS.map(w=>`<button type="button" class="nchip${S.win===w?" on":""}" data-w="${w}">${w}</button>`).join("")}</div>
+${txt("lose","失敗條件","例：掉下去或生命歸零")}
+<div class="chips" style="margin-top:7px"><small class="hint" style="margin:0;align-self:center">💀 常見失敗：</small>${LOSES.map(l=>`<button type="button" class="nchip${S.lose===l?" on":""}" data-l="${l}">${l}</button>`).join("")}</div>
+<label class="t">難度感受</label>${chips("diff",DIFF)}
+<h2 style="margin-top:20px">④ 風格與功能</h2>
+<label class="t">美術風格</label>${chips("style",STYLE)}
+<label class="t">想要的功能（可複選）</label>${chips("feats",FEAT,1)}
+${S.type==="塔防"?`<label class="t">🏰 塔防專屬選項（可複選，共 20 項）</label><p class="hint" style="margin:0 0 6px">前 8 項為塔種、中 6 項為敵人、後 6 項為機制。</p>`+chips("td",TD,1):""}
+${txt("extra","特別想加的點子（選填）","例：每關加入會移動的平台",1)}
+<div class="row" style="margin-top:16px"><button class="btn sec2" id="reset">清空重填</button></div>`;
+}
+function pct(){const k=["name","type","pitch","hero","goal","win","lose","style"];let n=k.filter(x=>S[x]&&S[x].trim()).length;if(S.controls.length)n++;if(S.feats.length)n++;return Math.round(n/(k.length+2)*100)}
+const D=()=>({
+name:S.name||"（我的遊戲）",type:S.type||"（未選類型）",pitch:S.pitch||"（請補充）",hero:S.hero||"（請補充）",goal:S.goal||"（請補充）",
+ctrl:S.controls.join("、")||"鍵盤",win:S.win||"（請補充）",lose:S.lose||"（請補充）",style:S.style||"簡潔易讀",
+feats:S.feats.length?S.feats.map(f=>"・"+f).join("\n"):"・計分\n・開始／結束畫面",extra:S.extra||"無"});
+const tdx=()=>S.type==="塔防"&&S.td.length?"\n【塔防專屬設計】\n塔種／敵人／機制：\n"+S.td.map(x=>"・"+x).join("\n")+"\n（請設計各塔的數值表、敵人屬性表與每波出怪節奏，並保持平衡）\n":"";
+function full(){const d=D();return `你是一位資深遊戲工程師，也擅長教零基礎初學者。請幫我用【${S.tech}】製作一款可完整遊玩的遊戲。
+
+【遊戲概念】
+名稱：${d.name}
+類型：${d.type}
+簡介：${d.pitch}
+
+【玩法與規則】
+主角：${d.hero}
+玩家目標：${d.goal}
+操作方式：${d.ctrl}
+勝利條件：${d.win}
+失敗條件：${d.lose}
+難度感受：${S.diff}（請設計循序漸進的難度曲線）
+
+【風格】
+美術風格：${d.style}
+（不使用外部圖片，全部以程式繪製圖形；顏色請搭配和諧、對比清楚）
+
+【必備功能】
+${d.feats}
+
+${tdx()}
+【額外想法】
+${d.extra}
+
+【程式品質要求】
+1. 輸出可直接執行的完整程式碼，不要省略、不要寫「其餘同上」。
+2. 程式註解使用繁體中文，每個函式說明用途。
+3. 把可調整參數（速度、生命、重力、得分等）集中放在檔案最上方的 CONFIG 區。
+4. 結構清楚：初始化、輸入處理、更新邏輯、繪製、遊戲狀態切換分開。
+5. 避免常見錯誤：處理視窗縮放、按鍵重複觸發、遊戲結束後可重新開始。
+
+【回覆格式】
+① 先用 3 句話說明你的設計思路
+② 提供完整程式碼
+③ 說明如何執行
+④ 列出 5 個我可以自己修改的參數，並教我改哪裡會有什麼效果
+⑤ 提出 3 個下一步可以擴充的點子`}
+function stages(){const d=D();const c=`《${d.name}》（${d.type}，使用 ${S.tech}）`;return [
+["階段 1｜建立可運行骨架","先讓畫面出現、能啟動","請為"+c+"建立最小可運行骨架：畫面載入、主迴圈、開始畫面與遊戲狀態切換。先不要做玩法。程式碼要完整、有繁體中文註解，並教我如何執行與確認成功。"],
+["階段 2｜核心玩法","主角能動、有目標","在目前的程式基礎上加入核心玩法：主角是「"+d.hero+"」，操作為"+d.ctrl+"。目標：「"+d.goal+"」。請只修改必要部分，並完整輸出更新後的全部程式碼。"],
+["階段 3｜規則與勝負","有輸有贏、可重來","加入勝利條件「"+d.win+"」與失敗條件「"+d.lose+"」，並加上結束畫面與重新開始功能。難度感受："+S.diff+"，請設計難度隨進度提升的機制。"],
+["階段 4｜功能補完","分數、生命、關卡等","請依序加入以下功能，並確保彼此不衝突：\n"+d.feats+tdx()+"\n額外想法："+d.extra+"\n完成後完整輸出程式碼。"],
+["階段 5｜視覺與手感","風格、動畫、回饋","把整體美術調整為「"+d.style+"」風格：統一配色、加入簡單動畫與粒子／震動等回饋效果，讓操作更有手感。不使用外部圖檔。"],
+["階段 6｜測試與發佈","找 bug、整理、上線","請扮演測試工程師，逐項檢查目前程式的 bug、邊界情況與效能問題並修正。接著整理程式碼，告訴我如何免費發佈到網路（例如 GitHub Pages），並提供一份簡短的遊戲說明文字。"]]}
+const FIX=[
+["遊戲跑不起來／白畫面","我的遊戲出現錯誤或白畫面。錯誤訊息如下：\n【貼上瀏覽器 Console 錯誤】\n請用白話解釋原因，指出出錯的那一行，並給我修正後的完整程式碼。"],
+["操作手感不好","目前操作感覺【太慢／太滑／延遲／不精準】。請分析原因，並調整相關參數與邏輯，說明每個數值改了什麼、為什麼。"],
+["太難或太簡單","遊戲目前【太難／太簡單】。請檢視難度曲線，給我 3 個調整方案（改參數、改敵人節奏、改獎勵），並實作你最推薦的一個。"],
+["加一個新功能","請在不破壞現有功能的前提下，加入：【功能描述】。先說明要改動哪些部分，再完整輸出修改後的程式碼。"],
+["看不懂這段程式","請用國中生能懂的方式，逐段解釋下面的程式碼在做什麼，並用生活化比喻說明：\n【貼上程式碼】"],
+["優化與整理","請在不改變行為的前提下重構這份程式：消除重複、改善命名、把魔術數字抽成 CONFIG，並指出潛在效能問題。"],
+["手機也能玩","請讓遊戲支援手機：加入觸控／虛擬按鈕、畫面自動縮放、防止網頁捲動與雙擊放大。"],
+["想學更多","根據我這款遊戲，幫我設計一份 7 天的新手學習計畫，每天一個小任務，從修改參數到自己加入新機制。"]];
+function box(title,sub,text,id){return `<div class="stage"><div class="row" style="justify-content:space-between"><div><h3>${title}</h3>${sub?`<small>${sub}</small>`:""}</div><button class="btn sec2" data-copy="${id}">複製</button></div><pre id="${id}">${text.replace(/&/g,"&amp;").replace(/</g,"&lt;")}</pre></div>`}
+function renderOut(){
+const p=pct();$("#pct").textContent="完成度 "+p+"%";$("#barfill").style.width=p+"%";
+let h="";
+if(tab==="full"){h=`<p class="hint">把這份指令整段貼給 Claude 或其他 AI，即可得到完整遊戲。${p<60?"<b>（資料還很少，填越完整結果越好）</b>":""}</p><div class="row"><button class="btn" data-copy="fullp">📋 複製完整指令</button></div><pre id="fullp">${full().replace(/&/g,"&amp;").replace(/</g,"&lt;")}</pre>`}
+else if(tab==="stages"){h=`<p class="hint">一步一步做，每完成一階段先試玩，再貼下一階段。比一次做完更穩。</p>`+stages().map((s,i)=>box(s[0],s[1],s[2],"st"+i)).join("")}
+else{h=`<p class="hint">遇到問題時，複製對應指令，把【】內容換成你的內容。</p>`+FIX.map((s,i)=>box(s[0],"",s[1],"fx"+i)).join("")}
+$("#out").innerHTML=h}
+function toast(){const t=$("#toast");t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1300)}
+document.addEventListener("click",e=>{
+const c=e.target.closest(".chip");
+if(c){const k=c.dataset.k,v=c.dataset.v;if(c.dataset.m==="1"){const a=S[k];const i=a.indexOf(v);i>=0?a.splice(i,1):a.push(v)}else S[k]=S[k]===v?"":v;save();renderForm();renderOut();return}
+const ls=e.target.closest("[data-l]");if(ls){S.lose=ls.dataset.l;save();renderForm();renderOut();return}
+const wn=e.target.closest("[data-w]");if(wn){S.win=wn.dataset.w;save();renderForm();renderOut();return}
+const gl=e.target.closest("[data-g]");if(gl){S.goal=gl.dataset.g;save();renderForm();renderOut();return}
+const nm=e.target.closest("[data-n]");if(nm){S.name=nm.dataset.n;save();renderForm();renderOut();return}
+const t=e.target.closest(".tab");if(t){tab=t.dataset.t;document.querySelectorAll(".tab").forEach(x=>x.classList.toggle("on",x===t));renderOut();return}
+const cp=e.target.closest("[data-copy]");if(cp){const txt=document.getElementById(cp.dataset.copy).textContent;(navigator.clipboard?navigator.clipboard.writeText(txt):Promise.reject()).catch(()=>{const r=document.createRange();r.selectNode(document.getElementById(cp.dataset.copy));getSelection().removeAllRanges();getSelection().addRange(r);try{document.execCommand("copy")}catch(_){}}).finally(toast);return}
+const pr=e.target.closest("[data-p]");if(pr){const q=P[pr.dataset.p];S=Object.assign({},S,q,{feats:q.feats.slice(),controls:q.controls.slice(),td:(q.td||[]).slice()});save();renderForm();renderOut();return}
+if(e.target.id==="reset"){S={name:"",type:"",tech:TECH[0],pitch:"",hero:"",goal:"",controls:[],win:"",lose:"",diff:"適中",style:"",feats:[],td:[],extra:""};save();renderForm();renderOut()}
+});
+document.addEventListener("input",e=>{const f=e.target.dataset.f;if(f){S[f]=e.target.value;save();renderOut()}});
+document.addEventListener("change",e=>{const f=e.target.dataset.f;if(f&&e.target.tagName==="SELECT"){S[f]=e.target.value;save();renderOut()}});
+$("#presets").innerHTML=[["snake","🐍 貪食蛇"],["jump","🐱 平台跳躍"],["shoot","🚀 太空射擊"],["brick","🧱 打磚塊"],["match3","💎 寶石消除"],["memory","🃏 記憶翻牌"],["flap","🐦 小鳥穿越"],["td","🏰 迷你塔防"],["text","📖 文字冒險"],["rhythm","🎵 節奏音游"],["race","🏎️ 賽車"],["whack","🔨 打地鼠"],["pong","🏓 乒乓對戰"]].map(a=>`<button class="btn sec2" data-p="${a[0]}">${a[1]}</button>`).join("");
+renderForm();renderOut();
+</script>
+</body>
+</html>
